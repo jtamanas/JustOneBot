@@ -29,11 +29,8 @@ class JustOne(commands.Cog):
         # Game settings
         self.round_delay = 25
         self.game_channel_id = 618957002554736652
+        self.voice_channel_id = 618922677838544910
         self.num_rounds = 13
-        # generate random word list
-        rand_words = random.choices(list(open('word_list.txt')), k=self.num_rounds)
-        self.all_secret_words = [word.rstrip().title() for word in rand_words]
-
 
         # Game flags
         self.game_started = False
@@ -42,6 +39,9 @@ class JustOne(commands.Cog):
         self.guess_round = False
         self.round_count = 0
         self.points = 0
+        # generate random word list
+        rand_words = random.choices(list(open('word_list.txt')), k=self.num_rounds)
+        self.all_secret_words = [word.rstrip().title() for word in rand_words]
 
     def reset_hint_data(self):
         self.hints = []
@@ -51,8 +51,8 @@ class JustOne(commands.Cog):
         self.guess_msg = "sfhiouwehf"
         self.gave_hint = []
 
-
     def reset_game(self):
+        self.reset_hint_data()
         self.players = []
         # Game flags
         self.game_started = False
@@ -61,6 +61,9 @@ class JustOne(commands.Cog):
         self.guess_round = False
         self.round_count = 0
         self.points = 0
+        # generate random word list
+        rand_words = random.choices(list(open('word_list.txt')), k=self.num_rounds)
+        self.all_secret_words = [word.rstrip().title() for word in rand_words]
 
     def get_secret_word(self):
         return self.all_secret_words[self.round_count]
@@ -117,6 +120,9 @@ class JustOne(commands.Cog):
         role = self.amnesia_role
         await self.guesser.remove_roles(role)
 
+    def play_guess_tone(self):
+        self.vc.play(discord.FFmpegPCMAudio('cogs/sounds/guess_tone.mp3'))
+
     async def hints_post(self):
         title = "Secret Word"
         if self.hint_round:
@@ -134,9 +140,10 @@ class JustOne(commands.Cog):
         embed.add_field(name="Hints", value=hint_msg_content)
 
         hint_msg = await self.channel.send('', embed=embed)
-        emoji_nums = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣']
-        for i, hint in enumerate(hints):
-            await hint_msg.add_reaction(emoji_nums[i])
+        if self.hint_round:  # not needed during guess phase
+            emoji_nums = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣']
+            for i, hint in enumerate(hints):
+                await hint_msg.add_reaction(emoji_nums[i])
         return hint_msg
 
     async def del_bad_hints(self, hint_msg):
@@ -162,7 +169,6 @@ class JustOne(commands.Cog):
         await self.guess_msg.add_reaction(thumbs_down)
         await self.channel.send("React with {} if this is correct, "
                             "react with {} if it's not".format(thumbs_up, thumbs_down))
-        await self.channel.send('(The secret word was "{}")'.format(self.secret_word))
 
     async def update_score(self):
         ess = "s"
@@ -232,9 +238,8 @@ class JustOne(commands.Cog):
             self.generate_turn_order()
         await self.set_player_roles(self.players)
         await self.assign_blinds()
-        await self.assign_players()  # give everyone the hinter role do guesser can see channel after
+        await self.assign_players()  # give everyone the hinter role so guesser can see channel after
         await self.assign_quiets()
-
 
         # Start hint phase
         self.hint_round = True
@@ -255,11 +260,9 @@ class JustOne(commands.Cog):
             except asyncio.TimeoutError:
                 pass
 
-
         # End hint phase and begin guessing phase
         self.hint_round = False
         self.guess_round = True
-
 
         # Post hints
         await self.remove_quiets()
@@ -279,6 +282,7 @@ class JustOne(commands.Cog):
             await self.channel.send('Wrap your clue in quotation marks, e.g. "clue".'
                                     'Remember, one word clues only!')
         elif self.guess_round:
+            self.play_guess_tone()  # sound alert
             await self.channel.send('Wrap your answer in quotation marks, e.g. "answer".'
                                     'Remember, one word answers only!')
 
@@ -295,12 +299,14 @@ class JustOne(commands.Cog):
         except asyncio.TimeoutError:
             await self.channel.send('You took too long...')
 
-
         # Check correctness of guess
         if self.answer != self.default_answer:
             await self.start_vote_on_guess()
         else:
             await self.channel.send("Times up! No answer submitted.")
+
+        # post secret word so people can be reminded
+        await self.channel.send('(The secret word was "{}")'.format(self.secret_word))
 
         await asyncio.sleep(self.round_delay)
 
@@ -321,7 +327,10 @@ class JustOne(commands.Cog):
             await self.remove_players()
             await self.remove_amnesias()
             await self.remove_blinds()
-
+            # leave voice channel
+            await self.vc.disconnect()
+            # reset game
+            await self.reset_game()
 
     @command(name='start_game', aliases=('just_one', 'justone'))
     async def start_game(self, ctx: Context):
@@ -330,6 +339,8 @@ class JustOne(commands.Cog):
             return
 
         self.channel = self.bot.get_channel(self.game_channel_id)
+        self.voice_channel = self.bot.get_channel(self.voice_channel_id)
+        self.vc = await self.voice_channel.connect()
 
         # eventually replace this with a smarter thing
         player_role_id = 618923454556536893
@@ -364,7 +375,6 @@ class JustOne(commands.Cog):
 
         await self.begin_round()
 
-
     @command(name='join')
     async def join(self, ctx: Context):
         if self.game_started and not self.registration:
@@ -379,7 +389,6 @@ class JustOne(commands.Cog):
         # add player to list of players
         if ctx.channel.id == self.game_channel_id:
             self.players.append(ctx.message.author)
-
 
     @command(name='rules')
     async def rules(self, ctx: Context):
