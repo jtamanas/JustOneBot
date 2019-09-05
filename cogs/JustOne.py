@@ -144,6 +144,7 @@ class JustOne(commands.Cog):
                 dels.append(i)
         # delete all of the clues with non-zero votes
         # reverse dels so we don't mess up indices of other elements
+        dels.reverse()
 
         hints = self.hints
         for del_ind in dels:
