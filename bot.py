@@ -85,14 +85,6 @@ async def insult(ctx):
         await ctx.send(ctx.message.author.mention + " you're a {}!".format(slur))
 
 
-
-@bot.command()
-async def test(ctx):
-    insult = insulter.gen_insult("cogs/insulter/")
-    print
-    await ctx.send(ctx.message.author.mention + " you're a {}!".format(insult))
-
-
 @bot.command()
 async def register(ctx):
     players.append(ctx.message.author)
