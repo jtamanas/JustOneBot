@@ -232,6 +232,7 @@ class JustOne(commands.Cog):
         return full_condition
 
     async def begin_round(self):
+        # TODO: refactor this? it's very long
         await self.channel.send("**-------- Beginning Round {} --------**".format(self.round_count+1))
 
         if self.round_count == 0:
