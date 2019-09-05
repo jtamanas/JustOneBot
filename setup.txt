@@ -1,0 +1,9 @@
+Every round someone will be assigned to be the active player. They will be given the "Keller" role making them unable to hear voice chat and read the text chat.
+
+A random noun will be given to the rest of the players who will then DM their clues (wrapped in quotation marks) to the bot.
+
+The bot will then present the clues to the players who must vote on which clues to cancel.
+
+The active player will regain the ability to listen and read, and will be presented the remaining clues by the bot. They will then have to respond with their guess.
+
+The group will then all vote to determine the correctness of the guess.
