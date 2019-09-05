@@ -29,6 +29,10 @@ class JustOne(commands.Cog):
         self.round_delay = 25
         self.game_channel_id = 618957002554736652
         self.num_rounds = 13
+        # generate random word list
+        rand_words = random.choices(list(open('word_list.txt')), k=self.num_rounds)
+        self.all_secret_words = [word.rstrip().title() for word in rand_words]
+
 
         # Game flags
         self.game_started = False
@@ -57,9 +61,8 @@ class JustOne(commands.Cog):
         self.round_count = 0
         self.points = 0
 
-
     def get_secret_word(self):
-        return random.choice(list(open('word_list.txt'))).rstrip().title()
+        return self.all_secret_words[self.round_count]
 
     async def post_secret_word(self):
         await self.channel.send('The secret word is "{}". '.format(self.secret_word))
@@ -354,7 +357,7 @@ class JustOne(commands.Cog):
         self.players.append(ctx.message.author)
 
         # wait 60 seconds for people to join
-        await asyncio.sleep(10)
+        await asyncio.sleep(self.round_delay)
         await ctx.send("Registration period over, game starting now!")
         self.registration = False  # end registration period
 
