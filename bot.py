@@ -92,5 +92,5 @@ bot.load_extension("cogs.JustOne")
 
 players = []
 
-TOKEN = "NjE3NzU0MTEzMzIwNTUwNDk2.XWvu6w.2WKum-MpYNHtZultHeGGWTKGQJc"
+TOKEN = list(open('.token'))[0]
 bot.run(TOKEN)
