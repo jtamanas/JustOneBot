@@ -279,6 +279,7 @@ class JustOne(commands.Cog):
 
         await self.channel.send("You have {} seconds.".format(self.round_delay))
         # Register guess
+        # TODO: add check for multiple word clues
         try:
             self.guess_msg = await self.bot.wait_for('message', check=self.is_answer, timeout=self.round_delay)
             answer = self.guess_msg.content
@@ -357,38 +358,6 @@ class JustOne(commands.Cog):
         self.registration = False  # end registration period
 
         await self.begin_round()
-
-
-    # @commands.Cog.listener()
-    # async def on_message(self, message):
-        """
-        Ideally, I'd like to load these individually at the appropriate times
-
-        Register people during registration
-        Accept hints during hint phase
-        Accept guess during guess phase
-        """
-        # if message.author.bot:
-        #     return  # ignore all bots
-        # if self.game_started:
-        #     if self.registration:
-        #         if message.content == self.cmd_prefix +"join":
-        #             # add player to player list
-        #             self.players.append(message.author)
-
-            # if self.hint_round:
-            #     # add hints to hints list
-            #     if message.author in self.players and message.author != self.guesser:
-            #         # TODO: add check for multiple word clues
-            #         # in 3 player games, hinters can give up to 2 clues, otherwise hinters give only 1
-            #         if author_cnt == 0 or (self.players <= 3 and author_cnt < 2):
-            #             if message.content[:1] == '"' or message.content[:1] == "'":
-            #                 if message.content[:1] == '"':
-            #                     hint = message.content.split('"')[1]
-            #                 elif message.content[:1] == "'":
-            #                     hint = message.content.split("'")[1]
-            #                 self.hints.append(hint.title())
-            #                 self.gave_hint.append(message.author)
 
 
     @command(name='join')
