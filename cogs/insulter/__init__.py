@@ -1,0 +1,1 @@
+from .insult_generator import *

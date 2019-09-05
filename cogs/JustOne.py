@@ -4,6 +4,7 @@ import discord
 from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Bot, Context, command, Cog
+import cogs.insulter as insulter
 
 import logging
 log = logging.getLogger(__name__)
@@ -175,7 +176,8 @@ class JustOne(commands.Cog):
                         ess = ""
                     await self.channel.send("You got it right! You now have {} point".format(self.points)+ess)
                 elif react_counts[0] < react_counts[1]:
-                    await self.channel.send("That was wrong, dumbass. You still have {} point".format(self.points)+ess)
+                    insult = insulter.gen_insult("cogs/insulter/")
+                    await self.channel.send("That was wrong, you {}. You still have {} point".format(insult, self.points)+ess)
                 else:
                     await self.channel.send("We did not reach a consensus... You still have {} point".format(self.points)+ess)
         else:
