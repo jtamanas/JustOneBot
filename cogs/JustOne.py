@@ -256,7 +256,6 @@ class JustOne(commands.Cog):
                 pass
 
 
-
         # End hint phase and begin guessing phase
         self.hint_round = False
         self.guess_round = True
@@ -283,7 +282,7 @@ class JustOne(commands.Cog):
             await self.channel.send('Wrap your answer in quotation marks, e.g. "answer".'
                                     'Remember, one word answers only!')
 
-        await self.channel.send("You have {} seconds.".format(self.round_delay))
+        await self.channel.send(self.guesser.mention + " You have {} seconds.".format(self.round_delay))
         # Register guess
         # TODO: add check for multiple word clues
         try:

@@ -2,7 +2,7 @@ import discord
 import asyncio
 import cogs
 from discord.ext import commands
-import cogs
+import cogs.insulter as insulter
 
 # initiate bot
 cmd_prefix = "!"
@@ -68,6 +68,29 @@ async def delete_me(ctx):
 @bot.command()
 async def get_roles(ctx):
     print(ctx.guild.roles)
+
+
+@bot.command()
+async def insult(ctx):
+    """
+    Generates a random insult to the message author or whoever the message author mentions
+    """
+    insultees = ctx.message.mentions
+    if insultees: # if someone was mentioned
+        for insultee in insultees:
+            slur = insulter.gen_insult("cogs/insulter/")
+            await ctx.send(insultee.mention + " you're a {}!".format(slur))
+    else:  # if no one else is mentioned
+        slur = insulter.gen_insult("cogs/insulter/")
+        await ctx.send(ctx.message.author.mention + " you're a {}!".format(slur))
+
+
+
+@bot.command()
+async def test(ctx):
+    insult = insulter.gen_insult("cogs/insulter/")
+    print
+    await ctx.send(ctx.message.author.mention + " you're a {}!".format(insult))
 
 
 @bot.command()
